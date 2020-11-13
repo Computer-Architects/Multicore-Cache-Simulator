@@ -311,3 +311,8 @@ class RAM():
         token = self.token
         self.token += 1
         return token
+
+if __name__ == '__main__':
+    cs,bs,a,n,instructions = 64,16,1,2,[[['READ', 16], ['WRITE',16], ['READ',16]], [['WRITE', 16], ['READ',16], ['WRITE',16]]]
+    comp = Computer(n,instructions, cs, bs, a)
+    comp.run()
