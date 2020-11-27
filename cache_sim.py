@@ -19,6 +19,9 @@ class Computer:
         maxTime = 20
         while not(self.done) and self.globalClock < maxTime:
             print('#'*18 + ' ' + str(self.globalClock) + ' ' + '#'*18)
+            
+            self.bus.tick(self.globalClock)
+
             for p in self.processors:
                 p.tick(self.globalClock)
             random.shuffle(self.caches)
@@ -26,8 +29,6 @@ class Computer:
                 c.tick(self.globalClock)
             
             self.mem.tick(self.globalClock)
-            
-            self.bus.tick(self.globalClock)
             
             self.dump()
 
