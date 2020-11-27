@@ -28,7 +28,7 @@ class MSI_Cache:
         self.numBusTransaction = 0  
 
     def containsEntry(self, addr):
-        tag, set_id = (addr % self.blockSz) // self.num_sets, (addr % self.blockSz) % self.num_sets
+        tag, set_id = (addr // self.blockSz) // self.num_sets, (addr // self.blockSz) % self.num_sets
         begin = set_id * self.num_entries_per_set
         end = (set_id+1) * self.num_entries_per_set
         for i in range(begin, end):
@@ -78,7 +78,7 @@ class MSI_Cache:
                             newEntry = request.entry
                         else:
                             newEntry.access = clock
-                            newEntry.valid, newEntry.tag, newEntry.index = True, (request.addr % self.blockSz) // self.num_sets, (request.addr % self.blockSz) % self.num_sets
+                            newEntry.valid, newEntry.tag, newEntry.index = True, (request.addr // self.blockSz) // self.num_sets, (request.addr // self.blockSz) % self.num_sets
                         newEntry.state = 'S' if self.currentRequestType == 'READ' else 'M'
                         self.addEntry(newEntry)
 
