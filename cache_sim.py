@@ -55,5 +55,6 @@ if __name__ == '__main__':
     cs,bs,a,n,instructions = 64,16,1,2,[[['READ', 16], ['WRITE',16], ['READ',16]], [['WRITE', 16], ['READ',16], ['WRITE',16]]]
     # Test 2
     # cs,bs,a,n,instructions = 64,16,1,2,[[['WRITE', 16], ['READ',16]], [['READ',16], ['READ',16]]]
+    cs,bs,a,n,instructions = 64,16,1,2,[[['READ', 16], ['WRITE',16]], [['READ', 43], ['WRITE',43]]]
     comp = Computer(n,instructions, cs, bs, a)
     comp.run()
