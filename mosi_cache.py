@@ -53,7 +53,7 @@ class MOSI_Cache:
                 return
         evict_entry = self.entries[cur_id]
         self.entries[cur_id] = entry
-        if evict_entry.state == 'M':
+        if evict_entry.state == 'M' or evict_entry.state == 'O':
             writeBackRequest = Request(None, 'Flush', self.id, self.currentRequestId)
             self.bus.requests = [writeBackRequest] + self.bus.requests
 
