@@ -4,7 +4,7 @@ from request import Request
 from cache_entry import CacheEntry
 from copy import deepcopy
 
-class MSI_Cache:
+class MOSI_Cache:
     def __init__(self, id, cacheSz, blockSz, a, bus, processor):
         self.id = id
         self.num_entries = int(cacheSz / blockSz)
@@ -95,13 +95,14 @@ class MSI_Cache:
                             self.bus.reply = request
                             self.bus.reply.entry = entry
                             self.entries[entry_id] = entry
-                        elif entry.state == 'M':
+                        elif entry.state == 'M' or entry.state == 'O':
                             # writeBackRequest = Request(request.addr, 'Flush', self.id)
+                            request.response = True
                             self.bus.reply = request
-                            self.bus.reply.msg = 'Flush'
-                            self.bus.reply.responseTime = 0
+                            self.bus.reply.entry = entry
+                            self.entries[entry_id] = entry
                             entry.access = clock
-                            entry.state = 'S'    
+                            entry.state = 'O'    
                         else:
                             print("snoopBus: Incorrect state while snooping")
                             exit()
@@ -110,7 +111,7 @@ class MSI_Cache:
                         return 'BusRd'
 
                     elif request.msg == 'BusRdX' and request.coreId != self.id:
-                        # State is either 'M' or 'S'
+                        # State is either 'M' or 'S' or 'O'
                         entry.valid = False
                         # print(self.bus.currentData.response)
                         request.response = True
@@ -166,7 +167,7 @@ class MSI_Cache:
 
             if self.currentRequestType == 'READ':
                 entry_id = self.containsEntry(self.currentRequestAddr)
-                if entry_id != -1 and self.entries[entry_id].state in ['M', 'S']:
+                if entry_id != -1 and self.entries[entry_id].state in ['M', 'S', 'O']:
                     print(f'Read hit at cache {self.id} in {self.entries[entry_id].state} state')
                     self.processor.response = self.currentRequestAddr
                     self.currentRequestAddr = None
@@ -182,8 +183,8 @@ class MSI_Cache:
                     self.processor.response = self.currentRequestAddr
                     self.currentRequestAddr = None
                     self.entries[entry_id].access = clock  # Relying on python's mutable objects
-                elif entry_id != -1 and self.entries[entry_id].state == 'S':
-                    print(f'Write hit at cache {self.id} in S state')
+                elif entry_id != -1 and self.entries[entry_id].state in ['S', 'O']:
+                    print(f'Write hit at cache {self.id} in {self.entries[entry_id].state} state')
                     # self.processor.response = self.currentRequestAddr
                     request = Request(self.currentRequestAddr, 'BusUpgr', self.id, self.currentRequestId)
                     # self.currentRequestAddr = None
