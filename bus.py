@@ -32,3 +32,7 @@ class Bus:
             print('-'*18 + ' Bus State ' + '-'*18)
             self.currentData.dump()
             print('\n')
+        elif self.reply != None:
+            print('-'*18 + ' Bus State ' + '-'*18)
+            self.reply.dump()
+            print('\n')
