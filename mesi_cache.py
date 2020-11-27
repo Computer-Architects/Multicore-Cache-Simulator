@@ -74,9 +74,9 @@ class MESI_Cache:
                             self.entries[entry_id].state == 'M'
                         else:
                             if request.responseTime > 0:
-                                self.entries[entry_id] = 'E'
+                                self.entries[entry_id].state = 'E'
                             else:
-                                self.entries[entry_id] = 'S'
+                                self.entries[entry_id].state = 'S'
 
                         self.entries[entry_id].access = clock # Relying on python's mutable objects
                     else:
@@ -90,9 +90,9 @@ class MESI_Cache:
                             self.entries[entry_id].state == 'M'
                         else:
                             if request.responseTime > 0:
-                                self.entries[entry_id] = 'E'
+                                self.entries[entry_id].state = 'E'
                             else:
-                                self.entries[entry_id] = 'S'
+                                self.entries[entry_id].state = 'S'
                         self.addEntry(newEntry)
 
                     return 'RECV_DATA'
