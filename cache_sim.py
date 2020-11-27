@@ -1,5 +1,5 @@
 import random
-from msi_cache import MSI_Cache, Processor, Bus
+from mesi_cache import MESI_Cache, Processor, Bus
 from memory import RAM
 random.seed(305)
 
@@ -12,7 +12,7 @@ class Computer:
         self.mem = RAM(self.bus)
         self.n = n
         self.processors = [Processor(i, instructions[i]) for i in range(n)]
-        self.caches = [MSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+        self.caches = [MESI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
         self.globalClock = 0
         self.done = False
     def run(self):
