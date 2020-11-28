@@ -70,13 +70,10 @@ class MESI_Cache:
                     if request.response:
                         self.bus.currentData = None
                     if entry_id != -1:
-                        if self.currentRequestType is not 'READ':
+                        if self.currentRequestType != 'READ':
                             self.entries[entry_id].state == 'M'
                         else:
-                            if request.responseTime > 0:
-                                self.entries[entry_id].state = 'E'
-                            else:
-                                self.entries[entry_id].state = 'S'
+                            self.entries[entry_id].state = 'E' if request.responseTime > 0 else 'S'
 
                         self.entries[entry_id].access = clock # Relying on python's mutable objects
                     else:
@@ -86,13 +83,10 @@ class MESI_Cache:
                         else:
                             newEntry.access = clock
                             newEntry.valid, newEntry.tag, newEntry.index = True, (request.addr // self.blockSz) // self.num_sets, (request.addr // self.blockSz) % self.num_sets
-                        if self.currentRequestType is not 'READ':
+                        if self.currentRequestType != 'READ':
                             self.entries[entry_id].state == 'M'
                         else:
-                            if request.responseTime > 0:
-                                self.entries[entry_id].state = 'E'
-                            else:
-                                self.entries[entry_id].state = 'S'
+                            self.entries[entry_id].state = 'E' if request.responseTime > 0 else 'S'
                         self.addEntry(newEntry)
 
                     return 'RECV_DATA'
@@ -102,7 +96,7 @@ class MESI_Cache:
                     entry = self.entries[entry_id]
                     # State must be M or S
                     if request.msg == 'BusRd':
-                        if entry.state is 'S' or entry.state is 'E':
+                        if entry.state == 'S' or entry.state == 'E':
                             entry.access = clock
                             entry.state = 'S'
                             request.response = True
