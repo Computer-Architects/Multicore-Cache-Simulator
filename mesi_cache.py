@@ -8,19 +8,34 @@ class MESI_Cache:
     """
     Simulator for the MESI cache with the processor
 
+    ...
+    Methods
+    -------
+    containsEntry(addr:int)
+    addEntry(entry: CacheEntry)
+    snoopBus(clock:int)
+    tick( clock:int)
+    dump()
+
     """
     def __init__(self, id: int, cacheSz: int, blockSz: int, a: int, bus: Bus, processor:Processor):
-        """
-        Constructor
-        inputs:
-            id: id of the processor
-            cacheSz: size of the cache
-            blockSz: size of the block
-            a: Associativity
-            bus: bus object
-            processor: processor object
-        return:
-            None
+        """ Constructor for the class
+
+        ...
+        Parameters
+        ----------
+        id: int
+            id of the processor
+        cacheSz: int
+             size of the cache
+        blockSz: int
+            size of the block
+        a: int
+            Associativity
+        bus: Bus
+            bus object
+        processor: Processor
+            processor object
 
         """
         self.id = id
@@ -44,11 +59,19 @@ class MESI_Cache:
         self.numWriteHit = 0
         self.numBusTransaction = 0  
 
-    def containsEntry(self, addr):
-        """
-        checks if the cache contains the entry as per the address
-        arguments:
-            addr: address
+    def containsEntry(self, addr:int):
+        """Checks if the cache contains an entry as per the address
+
+        ...
+        Parameters
+        ----------
+        addr: int
+            address in DM
+        
+        Returns
+        ------
+        int
+            the appropriate index in cache, or -1 if not available
 
 
         """
@@ -60,7 +83,14 @@ class MESI_Cache:
                 return i
         return -1
     
-    def addEntry(self, entry):
+    def addEntry(self, entry: CacheEntry):
+        """Add a new entry in cache if space permits
+
+        Parameters
+        ----------
+        entry: int
+            the new entry to be added in the cache
+        """
         set_id = entry.index #(addr % self.blockSz) // self.num_sets, (addr % self.blockSz) % self.num_sets
         begin = set_id * self.num_entries_per_set
         end = (set_id+1) * self.num_entries_per_set
@@ -82,7 +112,19 @@ class MESI_Cache:
             self.bus.requests = [writeBackRequest] + self.bus.requests
 
     # Need to modify according to protocol
-    def snoopBus(self, clock):
+    def snoopBus(self, clock:int):
+        """Snoops the bus and updates accordingly
+
+        .....
+        Parameters
+        ----------
+        clock: int
+            the clock tick number
+        Returns
+        -------
+        str
+            The current state in Bus
+        """
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
             print(request.addr, request.coreId, request.msg, self.id, request.response)
@@ -175,7 +217,15 @@ class MESI_Cache:
                         print(f'Wrong msg {request.msg}, {request.coreId} detected in the bus while snooping by cache {self.id}')
         return 'UNUSED'
 
-    def tick(self, clock):
+    def tick(self, clock:int):
+        """Runs one tick of the clock
+
+        .....
+        Parameters
+        ----------
+        clock: int
+            the clock tick number
+        """
         res = self.snoopBus(clock)
         print(f'{res} returned by snooping at cache {self.id}')
         if res not in ['Upgraded', 'UNUSED', 'RECV_DATA']:
@@ -232,6 +282,7 @@ class MESI_Cache:
         return
     
     def dump(self):
+        """Prints the current status of the cache for the processor"""
         print(print('-'*18 + f' Cache {self.id} State ' + '-'*18))
         print('Valid\tTag\tIndex\tState\tLast Access time')
         for entry in self.entries:
