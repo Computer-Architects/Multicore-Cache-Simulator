@@ -5,7 +5,24 @@ from cache_entry import CacheEntry
 from copy import deepcopy
 
 class MESI_Cache:
-    def __init__(self, id, cacheSz, blockSz, a, bus, processor):
+    """
+    Simulator for the MESI cache with the processor
+
+    """
+    def __init__(self, id: int, cacheSz: int, blockSz: int, a: int, bus: Bus, processor:Processor):
+        """
+        Constructor
+        inputs:
+            id: id of the processor
+            cacheSz: size of the cache
+            blockSz: size of the block
+            a: Associativity
+            bus: bus object
+            processor: processor object
+        return:
+            None
+
+        """
         self.id = id
         self.num_entries = int(cacheSz / blockSz)
         self.entries = [CacheEntry() for i in range(self.num_entries)]
@@ -28,6 +45,13 @@ class MESI_Cache:
         self.numBusTransaction = 0  
 
     def containsEntry(self, addr):
+        """
+        checks if the cache contains the entry as per the address
+        arguments:
+            addr: address
+
+
+        """
         tag, set_id = (addr // self.blockSz) // self.num_sets, (addr // self.blockSz) % self.num_sets
         begin = set_id * self.num_entries_per_set
         end = (set_id+1) * self.num_entries_per_set
@@ -73,6 +97,7 @@ class MESI_Cache:
                         if self.currentRequestType != 'READ':
                             self.entries[entry_id].state == 'M'
                         else:
+                            print(f"Setting the state as E or s for index {entry_id}")
                             self.entries[entry_id].state = 'E' if request.responseTime > 0 else 'S'
 
                         self.entries[entry_id].access = clock # Relying on python's mutable objects
@@ -84,9 +109,9 @@ class MESI_Cache:
                             newEntry.access = clock
                             newEntry.valid, newEntry.tag, newEntry.index = True, (request.addr // self.blockSz) // self.num_sets, (request.addr // self.blockSz) % self.num_sets
                         if self.currentRequestType != 'READ':
-                            self.entries[entry_id].state == 'M'
+                            newEntry.state == 'M'
                         else:
-                            self.entries[entry_id].state = 'E' if request.responseTime > 0 else 'S'
+                            newEntry.state = 'E' if request.responseTime > 0 else 'S'
                         self.addEntry(newEntry)
 
                     return 'RECV_DATA'
