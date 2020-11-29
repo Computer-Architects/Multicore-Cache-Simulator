@@ -16,7 +16,6 @@ class MESI_Cache:
     snoopBus(clock:int)
     tick( clock:int)
     dump()
-
     """
     def __init__(self, id: int, cacheSz: int, blockSz: int, a: int, bus: Bus, processor:Processor):
         """ Constructor for the class
@@ -36,7 +35,6 @@ class MESI_Cache:
             bus object
         processor: Processor
             processor object
-
         """
         self.id = id
         self.num_entries = int(cacheSz / blockSz)
@@ -72,8 +70,6 @@ class MESI_Cache:
         ------
         int
             the appropriate index in cache, or -1 if not available
-
-
         """
         tag, set_id = (addr // self.blockSz) // self.num_sets, (addr // self.blockSz) % self.num_sets
         begin = set_id * self.num_entries_per_set
