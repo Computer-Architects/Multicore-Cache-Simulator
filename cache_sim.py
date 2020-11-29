@@ -25,7 +25,7 @@ class Computer:
         self.globalClock = 0
         self.done = False
     def run(self):
-        maxTime = 20
+        maxTime = 2000
         while not(self.done) and self.globalClock < maxTime:
             print('#'*18 + ' ' + str(self.globalClock) + ' ' + '#'*18)
             for p in self.processors:
