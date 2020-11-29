@@ -132,7 +132,8 @@ class MESI_Cache:
 
             if request.response or request.msg == 'Flush':
                 # This is a response to some data request
-                if request.id == self.currentRequestId and request.coreId == self.id and request.addr == self.currentRequestAddr:
+                if request.addr != None and request.id == self.currentRequestId and request.coreId == self.id and request.addr == self.currentRequestAddr:
+                    entry_id = self.containsEntry(request.addr)
                     if request.response:
                         self.bus.currentData = None
                     if entry_id != -1:
