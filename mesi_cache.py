@@ -109,6 +109,7 @@ class MESI_Cache:
         if evict_entry.state == 'M':
             writeBackRequest = Request(None, 'Flush', self.id, self.currentRequestId)
             self.bus.requests = [writeBackRequest] + self.bus.requests
+            self.numMemBusTransaction += 1
 
     # Need to modify according to protocol
     def snoopBus(self, clock:int):
@@ -126,10 +127,6 @@ class MESI_Cache:
         """
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
-            if request.responseTime == 0:
-                self.numCacheBusTransaction += 1
-            else:
-                self.numMemBusTransaction += 1
             print(request.addr, request.coreId, request.msg, self.id, request.response)
             # entry_id = self.containsEntry(request.addr)
 
@@ -137,6 +134,10 @@ class MESI_Cache:
                 # This is a response to some data request
                 if request.addr != None and request.id == self.currentRequestId and request.coreId == self.id and request.addr == self.currentRequestAddr:
                     entry_id = self.containsEntry(request.addr)
+                    if request.responseTime == 0:
+                        self.numCacheBusTransaction += 1
+                    else:
+                        self.numMemBusTransaction += 1
                     if request.response:
                         self.bus.currentData = None
                     if entry_id != -1:
