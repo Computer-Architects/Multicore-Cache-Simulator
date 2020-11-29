@@ -1,5 +1,8 @@
 import random
 from mesi_cache import MESI_Cache, Processor, Bus
+from msi_cache import MSI_Cache
+from mosi_cache import MOSI_Cache
+from moesi_cache import MOESI_Cache
 
 from memory import RAM
 random.seed(305)
@@ -20,7 +23,7 @@ class Computer:
         elif protocol == 'MOSI':
             self.caches = [MOSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
         elif protocol == 'MOESI':
-            self.caches = [MSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+            self.caches = [MOESI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
         else:
             raise Exception('No such protocol !!!')
         self.globalClock = 0
