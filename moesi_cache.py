@@ -108,7 +108,7 @@ class MOESI_Cache:
             writeBackRequest = Request(None, 'Flush', self.id, self.currentRequestId)
             self.bus.requests = [writeBackRequest] + self.bus.requests
             self.numMemBusTransaction += 1
-            
+
     # Need to modify according to protocol
     def snoopBus(self, clock:int):
         """Snoops the bus and updates accordingly
@@ -134,7 +134,7 @@ class MOESI_Cache:
                     entry_id = self.containsEntry(request.addr)
                     if request.responseTime == 0:
                         self.numCacheBusTransaction += 1
-                    else:
+                    if request.responseTime > 0 or request.msg == 'Flush':
                         self.numMemBusTransaction += 1
                     if request.response:
                         self.bus.currentData = None
