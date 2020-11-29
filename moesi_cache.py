@@ -4,9 +4,9 @@ from request import Request
 from cache_entry import CacheEntry
 from copy import deepcopy
 
-class MOSI_Cache:
+class MOESI_Cache:
     """
-    Simulator for the MOSI cache with the processor
+    Simulator for the MOESI cache with the processor
 
     ...
     Methods
@@ -17,6 +17,7 @@ class MOSI_Cache:
     tick( clock:int)
     dump()
     """
+
     def __init__(self, id: int, cacheSz: int, blockSz: int, a: int, bus: Bus, processor:Processor):
         """ Constructor for the class
 
@@ -133,7 +134,10 @@ class MOSI_Cache:
                     if request.response:
                         self.bus.currentData = None
                     if entry_id != -1:
-                        self.entries[entry_id].state = 'S' if self.currentRequestType == 'READ' else 'M'  # Relying on python's mutable objects
+                        if request.responseTime > 0:
+                            self.entries[entry_id].state = 'E' if self.currentRequestType == 'READ' else 'M'  # Relying on python's mutable objects
+                        else:
+                            self.entries[entry_id].state = 'S' if self.currentRequestType == 'READ' else 'M'
                         self.entries[entry_id].access = clock # Relying on python's mutable objects
                     else:
                         newEntry = CacheEntry()
@@ -142,7 +146,10 @@ class MOSI_Cache:
                         else:
                             newEntry.access = clock
                             newEntry.valid, newEntry.tag, newEntry.index = True, (request.addr // self.blockSz) // self.num_sets, (request.addr // self.blockSz) % self.num_sets
-                        newEntry.state = 'S' if self.currentRequestType == 'READ' else 'M'
+                        if request.responseTime > 0:
+                            newEntry.state = 'E' if self.currentRequestType == 'READ' else 'M'  # Relying on python's mutable objects
+                        else:
+                            newEntry.state = 'S' if self.currentRequestType == 'READ' else 'M'
                         self.addEntry(newEntry)
 
                     return 'RECV_DATA'
@@ -153,8 +160,9 @@ class MOSI_Cache:
                     entry = self.entries[entry_id]
                     # State must be M or S
                     if request.msg == 'BusRd':
-                        if entry.state == 'S':
+                        if entry.state == 'S' or entry.state == 'E':
                             entry.access = clock
+                            entry.state = 'S'
                             request.response = True
                             self.bus.reply = request
                             self.bus.reply.entry = entry
@@ -175,7 +183,7 @@ class MOSI_Cache:
                         return 'BusRd'
 
                     elif request.msg == 'BusRdX' and request.coreId != self.id:
-                        # State is either 'M' or 'S' or 'O'
+                        # State is either 'M' or 'S' or 'O' or 'E'
                         entry.valid = False
                         # print(self.bus.currentData.response)
                         request.response = True
@@ -239,7 +247,7 @@ class MOSI_Cache:
 
             if self.currentRequestType == 'READ':
                 entry_id = self.containsEntry(self.currentRequestAddr)
-                if entry_id != -1 and self.entries[entry_id].state in ['M', 'S', 'O']:
+                if entry_id != -1 and self.entries[entry_id].state in ['M', 'S', 'O', 'E']:
                     print(f'Read hit at cache {self.id} in {self.entries[entry_id].state} state')
                     self.processor.response = self.currentRequestAddr
                     self.currentRequestAddr = None
@@ -250,11 +258,12 @@ class MOSI_Cache:
                     self.bus.requests.append(request)
             if self.currentRequestType == 'WRITE':
                 entry_id = self.containsEntry(self.currentRequestAddr)
-                if entry_id != -1 and self.entries[entry_id].state == 'M':
-                    print(f'Write hit at cache {self.id} in M state')
+                if entry_id != -1 and self.entries[entry_id].state in ['M', 'E']:
+                    print(f'Write hit at cache {self.id} in {self.entries[entry_id].state} state')
                     self.processor.response = self.currentRequestAddr
                     self.currentRequestAddr = None
                     self.entries[entry_id].access = clock  # Relying on python's mutable objects
+                    self.entries[entry_id].state = 'M'
                 elif entry_id != -1 and self.entries[entry_id].state in ['S', 'O']:
                     print(f'Write hit at cache {self.id} in {self.entries[entry_id].state} state')
                     # self.processor.response = self.currentRequestAddr
