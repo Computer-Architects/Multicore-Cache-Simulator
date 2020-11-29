@@ -4,8 +4,38 @@ from request import Request
 from cache_entry import CacheEntry
 from copy import deepcopy
 
-class MSI_Cache:
-    def __init__(self, id, cacheSz, blockSz, a, bus, processor):
+class MOSI_Cache:
+    """
+    Simulator for the MOSI cache with the processor
+
+    ...
+    Methods
+    -------
+    containsEntry(addr:int)
+    addEntry(entry: CacheEntry)
+    snoopBus(clock:int)
+    tick( clock:int)
+    dump()
+    """
+    def __init__(self, id: int, cacheSz: int, blockSz: int, a: int, bus: Bus, processor:Processor):
+        """ Constructor for the class
+
+        ...
+        Parameters
+        ----------
+        id: int
+            id of the processor
+        cacheSz: int
+             size of the cache
+        blockSz: int
+            size of the block
+        a: int
+            Associativity
+        bus: Bus
+            bus object
+        processor: Processor
+            processor object
+        """
         self.id = id
         self.num_entries = int(cacheSz / blockSz)
         self.entries = [CacheEntry() for i in range(self.num_entries)]
@@ -27,7 +57,20 @@ class MSI_Cache:
         self.numWriteHit = 0
         self.numBusTransaction = 0  
 
-    def containsEntry(self, addr):
+    def containsEntry(self, addr:int):
+        """Checks if the cache contains an entry as per the address
+
+        ...
+        Parameters
+        ----------
+        addr: int
+            address in DM
+        
+        Returns
+        ------
+        int
+            the appropriate index in cache, or -1 if not available
+        """
         tag, set_id = (addr // self.blockSz) // self.num_sets, (addr // self.blockSz) % self.num_sets
         begin = set_id * self.num_entries_per_set
         end = (set_id+1) * self.num_entries_per_set
@@ -36,7 +79,14 @@ class MSI_Cache:
                 return i
         return -1
     
-    def addEntry(self, entry):
+    def addEntry(self, entry: CacheEntry):
+        """Add a new entry in cache using LRU
+
+        Parameters
+        ----------
+        entry: int
+            the new entry to be added in the cache
+        """
         set_id = entry.index #(addr % self.blockSz) // self.num_sets, (addr % self.blockSz) % self.num_sets
         begin = set_id * self.num_entries_per_set
         end = (set_id+1) * self.num_entries_per_set
@@ -53,20 +103,33 @@ class MSI_Cache:
                 return
         evict_entry = self.entries[cur_id]
         self.entries[cur_id] = entry
-        if evict_entry.state == 'M':
+        if evict_entry.state == 'M' or evict_entry.state == 'O':
             writeBackRequest = Request(None, 'Flush', self.id, self.currentRequestId)
             self.bus.requests = [writeBackRequest] + self.bus.requests
 
     # Need to modify according to protocol
-    def snoopBus(self, clock):
+    def snoopBus(self, clock:int):
+        """Snoops the bus and updates accordingly
+
+        .....
+        Parameters
+        ----------
+        clock: int
+            the clock tick number
+        Returns
+        -------
+        str
+            Action performed by cache on Snooping
+        """
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
             print(request.addr, request.coreId, request.msg, self.id, request.response)
-            entry_id = self.containsEntry(request.addr)
+            # entry_id = self.containsEntry(request.addr)
 
             if request.response or request.msg == 'Flush':
                 # This is a response to some data request
-                if request.id == self.currentRequestId and request.coreId == self.id and request.addr == self.currentRequestAddr:
+                if request.addr != None and request.id == self.currentRequestId and request.coreId == self.id and request.addr == self.currentRequestAddr:
+                    entry_id = self.containsEntry(request.addr)
                     if request.response:
                         self.bus.currentData = None
                     if entry_id != -1:
@@ -85,6 +148,7 @@ class MSI_Cache:
                     return 'RECV_DATA'
                 
             else:
+                entry_id = self.containsEntry(request.addr)
                 if entry_id != -1:
                     entry = self.entries[entry_id]
                     # State must be M or S
@@ -95,13 +159,14 @@ class MSI_Cache:
                             self.bus.reply = request
                             self.bus.reply.entry = entry
                             self.entries[entry_id] = entry
-                        elif entry.state == 'M':
+                        elif entry.state == 'M' or entry.state == 'O':
                             # writeBackRequest = Request(request.addr, 'Flush', self.id)
+                            request.response = True
                             self.bus.reply = request
-                            self.bus.reply.msg = 'Flush'
-                            self.bus.reply.responseTime = 0
+                            self.bus.reply.entry = entry
+                            self.entries[entry_id] = entry
                             entry.access = clock
-                            entry.state = 'S'    
+                            entry.state = 'O'    
                         else:
                             print("snoopBus: Incorrect state while snooping")
                             exit()
@@ -110,7 +175,7 @@ class MSI_Cache:
                         return 'BusRd'
 
                     elif request.msg == 'BusRdX' and request.coreId != self.id:
-                        # State is either 'M' or 'S'
+                        # State is either 'M' or 'S' or 'O'
                         entry.valid = False
                         # print(self.bus.currentData.response)
                         request.response = True
@@ -142,7 +207,15 @@ class MSI_Cache:
                         print(f'Wrong msg {request.msg}, {request.coreId} detected in the bus while snooping by cache {self.id}')
         return 'UNUSED'
 
-    def tick(self, clock):
+    def tick(self, clock:int):
+        """Runs one tick of the clock
+
+        .....
+        Parameters
+        ----------
+        clock: int
+            the clock tick number
+        """
         res = self.snoopBus(clock)
         print(f'{res} returned by snooping at cache {self.id}')
         if res not in ['Upgraded', 'UNUSED', 'RECV_DATA']:
@@ -166,7 +239,7 @@ class MSI_Cache:
 
             if self.currentRequestType == 'READ':
                 entry_id = self.containsEntry(self.currentRequestAddr)
-                if entry_id != -1 and self.entries[entry_id].state in ['M', 'S']:
+                if entry_id != -1 and self.entries[entry_id].state in ['M', 'S', 'O']:
                     print(f'Read hit at cache {self.id} in {self.entries[entry_id].state} state')
                     self.processor.response = self.currentRequestAddr
                     self.currentRequestAddr = None
@@ -182,8 +255,8 @@ class MSI_Cache:
                     self.processor.response = self.currentRequestAddr
                     self.currentRequestAddr = None
                     self.entries[entry_id].access = clock  # Relying on python's mutable objects
-                elif entry_id != -1 and self.entries[entry_id].state == 'S':
-                    print(f'Write hit at cache {self.id} in S state')
+                elif entry_id != -1 and self.entries[entry_id].state in ['S', 'O']:
+                    print(f'Write hit at cache {self.id} in {self.entries[entry_id].state} state')
                     # self.processor.response = self.currentRequestAddr
                     request = Request(self.currentRequestAddr, 'BusUpgr', self.id, self.currentRequestId)
                     # self.currentRequestAddr = None
@@ -199,6 +272,7 @@ class MSI_Cache:
         return
     
     def dump(self):
+        """Prints the current status of the cache for the processor"""
         print(print('-'*18 + f' Cache {self.id} State ' + '-'*18))
         print('Valid\tTag\tIndex\tState\tLast Access time')
         for entry in self.entries:
