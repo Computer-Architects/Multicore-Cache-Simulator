@@ -51,10 +51,9 @@ class MSI_Cache:
         self.currentRequestId = None
 
         # Stats related fields
-        self.numReadMiss = 0
-        self.numWriteMiss = 0
-        self.numReadHit = 0
-        self.numWriteHit = 0
+        self.cacheAccesses = 0
+        self.cacheHits = 0
+        self.cacheMisses = 0
         self.numBusTransaction = 0  
 
     def containsEntry(self, addr):
@@ -123,6 +122,8 @@ class MSI_Cache:
         """
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
+            if request.responseTime == 0:
+                self.numBusTransaction += 1
             print(request.addr, request.coreId, request.msg, self.id, request.response)
             # entry_id = self.containsEntry(request.addr)
 
@@ -239,23 +240,27 @@ class MSI_Cache:
             if self.currentRequestType == 'READ':
                 entry_id = self.containsEntry(self.currentRequestAddr)
                 if entry_id != -1 and self.entries[entry_id].state in ['M', 'S']:
+                    self.cacheHits += 1
                     print(f'Read hit at cache {self.id} in {self.entries[entry_id].state} state')
                     self.processor.response = self.currentRequestAddr
                     self.currentRequestAddr = None
                     self.entries[entry_id].access = clock  # Relying on python's mutable objects
                 else:
                     print(f'Read miss at cache {self.id}')
+                    self.cacheMisses +=1 
                     request = Request(self.currentRequestAddr, 'BusRd', self.id, self.currentRequestId)
                     self.bus.requests.append(request)
             if self.currentRequestType == 'WRITE':
                 entry_id = self.containsEntry(self.currentRequestAddr)
                 if entry_id != -1 and self.entries[entry_id].state == 'M':
                     print(f'Write hit at cache {self.id} in M state')
+                    self.cacheHits += 1
                     self.processor.response = self.currentRequestAddr
                     self.currentRequestAddr = None
                     self.entries[entry_id].access = clock  # Relying on python's mutable objects
                 elif entry_id != -1 and self.entries[entry_id].state == 'S':
                     print(f'Write hit at cache {self.id} in S state')
+                    self.cacheHits += 1
                     # self.processor.response = self.currentRequestAddr
                     request = Request(self.currentRequestAddr, 'BusUpgr', self.id, self.currentRequestId)
                     # self.currentRequestAddr = None
@@ -264,6 +269,7 @@ class MSI_Cache:
                     # self.entries[entry_id].state = 'M'  # Relying on python's mutable objects
                 else:
                     print(f'Write miss at cache {self.id}')
+                    self.cacheMisses += 1
                     request = Request(self.currentRequestAddr, 'BusRdX', self.id, self.currentRequestId)
                     self.bus.requests.append(request)
         else: # do nothing
@@ -271,7 +277,8 @@ class MSI_Cache:
         return
     
     def dump(self):
-        print(print('-'*18 + f' Cache {self.id} State ' + '-'*18))
+        print('-'*18 + f' Cache {self.id} State ' + '-'*18)
+        print(f"Statistics: Hits: {self.cacheHits} | Misses: {self.cacheMisses} | Number of bus transactions:{self.numBusTransaction}")
         print('Valid\tTag\tIndex\tState\tLast Access time')
         for entry in self.entries:
             entry.dump()
