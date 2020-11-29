@@ -7,12 +7,21 @@ random.seed(305)
 # Else mutation can occur and all sorts of crazy bugs will occur
 
 class Computer:
-    def __init__(self, n, instructions, cacheSz, blockSz, a):
+    def __init__(self, protocol, n, instructions, cacheSz, blockSz, a):
         self.bus = Bus()
         self.mem = RAM(self.bus)
         self.n = n
         self.processors = [Processor(i, instructions[i]) for i in range(n)]
-        self.caches = [MSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+        if protocol == 'MSI':
+            self.caches = [MSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+        elif protocol == 'MESI':
+            self.caches = [MESI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+        elif protocol == 'MOSI':
+            self.caches = [MOSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+        elif protocol == 'MOESI':
+            self.caches = [MSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+        else:
+            raise Exception('No such protocol !!!')
         self.globalClock = 0
         self.done = False
     def run(self):
@@ -56,5 +65,6 @@ if __name__ == '__main__':
     # Test 2
     # cs,bs,a,n,instructions = 64,16,1,2,[[['WRITE', 16], ['READ',16]], [['READ',16], ['READ',16]]]
     cs,bs,a,n,instructions = 64,16,1,2,[[['READ', 16], ['WRITE',16]], [['READ', 43], ['WRITE',43]]]
-    comp = Computer(n,instructions, cs, bs, a)
+    protocol = 'MSI'
+    comp = Computer(protocol, n, instructions, cs, bs, a)
     comp.run()
