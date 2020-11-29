@@ -125,11 +125,12 @@ class MOESI_Cache:
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
             print(request.addr, request.coreId, request.msg, self.id, request.response)
-            entry_id = self.containsEntry(request.addr)
+            # entry_id = self.containsEntry(request.addr)
 
             if request.response or request.msg == 'Flush':
                 # This is a response to some data request
-                if request.id == self.currentRequestId and request.coreId == self.id and request.addr == self.currentRequestAddr:
+                if request.addr != None and request.id == self.currentRequestId and request.coreId == self.id and request.addr == self.currentRequestAddr:
+                    entry_id = self.containsEntry(request.addr)
                     if request.response:
                         self.bus.currentData = None
                     if entry_id != -1:
@@ -154,6 +155,7 @@ class MOESI_Cache:
                     return 'RECV_DATA'
                 
             else:
+                entry_id = self.containsEntry(request.addr)
                 if entry_id != -1:
                     entry = self.entries[entry_id]
                     # State must be M or S
