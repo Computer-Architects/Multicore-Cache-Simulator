@@ -58,7 +58,16 @@ class Computer:
             efficiency += 1-p.wastedCycles/p.numCycles
             print(f'Processor {p.id}: Total cycles = {p.numCycles}, Useful cycles = {p.numCycles-p.wastedCycles}, Efficiency = {1-p.wastedCycles/p.numCycles}')
         print(f'Total efficieny = {efficiency/self.n}')
-    
+        hits = 0
+        misses = 0
+        cacheBusTransactions = 0
+        memBusTransactions = 0
+        for c in self.caches:
+            hits += c.cacheHits
+            misses += c.cacheMisses
+            cacheBusTransactions += c.numCacheBusTransaction
+            memBusTransactions += c.numMemBusTransaction
+        print(f'{hits},{misses},{cacheBusTransactions},{memBusTransactions},{efficiency/self.n}')
     def dump(self):
         self.bus.dump()
         for c in self.caches:
