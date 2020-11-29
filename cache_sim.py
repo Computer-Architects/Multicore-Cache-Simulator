@@ -1,5 +1,6 @@
 import random
-from msi_cache import MSI_Cache, Processor, Bus
+from mesi_cache import MESI_Cache, Processor, Bus
+
 from memory import RAM
 random.seed(305)
 
@@ -12,13 +13,14 @@ class Computer:
         self.mem = RAM(self.bus)
         self.n = n
         self.processors = [Processor(i, instructions[i]) for i in range(n)]
-        self.caches = [MSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+        self.caches = [MESI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
         self.globalClock = 0
         self.done = False
     def run(self):
         maxTime = 20
         while not(self.done) and self.globalClock < maxTime:
             print('#'*18 + ' ' + str(self.globalClock) + ' ' + '#'*18)
+
             for p in self.processors:
                 p.tick(self.globalClock)
             random.shuffle(self.caches)
