@@ -7,6 +7,7 @@ from copy import deepcopy
 class MOESI_Cache:
     """
     Simulator for the MOESI cache with the processor
+
     ...
     Methods
     -------
@@ -19,6 +20,7 @@ class MOESI_Cache:
 
     def __init__(self, id: int, cacheSz: int, blockSz: int, a: int, bus: Bus, processor:Processor):
         """ Constructor for the class
+
         ...
         Parameters
         ----------
@@ -58,6 +60,7 @@ class MOESI_Cache:
 
     def containsEntry(self, addr:int):
         """Checks if the cache contains an entry as per the address
+
         ...
         Parameters
         ----------
@@ -79,6 +82,7 @@ class MOESI_Cache:
     
     def addEntry(self, entry: CacheEntry):
         """Add a new entry in cache using LRU
+
         Parameters
         ----------
         entry: int
@@ -107,6 +111,7 @@ class MOESI_Cache:
     # Need to modify according to protocol
     def snoopBus(self, clock:int):
         """Snoops the bus and updates accordingly
+
         .....
         Parameters
         ----------
@@ -210,6 +215,7 @@ class MOESI_Cache:
 
     def tick(self, clock:int):
         """Runs one tick of the clock
+
         .....
         Parameters
         ----------
