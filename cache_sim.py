@@ -1,5 +1,6 @@
 import random
-from msi_cache import MSI_Cache, Processor, Bus
+from mesi_cache import MESI_Cache, Processor, Bus
+
 from memory import RAM
 random.seed(305)
 
@@ -28,6 +29,7 @@ class Computer:
         maxTime = 2000
         while not(self.done) and self.globalClock < maxTime:
             print('#'*18 + ' ' + str(self.globalClock) + ' ' + '#'*18)
+
             for p in self.processors:
                 p.tick(self.globalClock)
             random.shuffle(self.caches)
