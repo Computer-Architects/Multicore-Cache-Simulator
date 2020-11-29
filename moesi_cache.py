@@ -5,7 +5,36 @@ from cache_entry import CacheEntry
 from copy import deepcopy
 
 class MOESI_Cache:
-    def __init__(self, id, cacheSz, blockSz, a, bus, processor):
+    """
+    Simulator for the MOESI cache with the processor
+    ...
+    Methods
+    -------
+    containsEntry(addr:int)
+    addEntry(entry: CacheEntry)
+    snoopBus(clock:int)
+    tick( clock:int)
+    dump()
+    """
+
+    def __init__(self, id: int, cacheSz: int, blockSz: int, a: int, bus: Bus, processor:Processor):
+        """ Constructor for the class
+        ...
+        Parameters
+        ----------
+        id: int
+            id of the processor
+        cacheSz: int
+             size of the cache
+        blockSz: int
+            size of the block
+        a: int
+            Associativity
+        bus: Bus
+            bus object
+        processor: Processor
+            processor object
+        """
         self.id = id
         self.num_entries = int(cacheSz / blockSz)
         self.entries = [CacheEntry() for i in range(self.num_entries)]
@@ -27,7 +56,19 @@ class MOESI_Cache:
         self.numWriteHit = 0
         self.numBusTransaction = 0  
 
-    def containsEntry(self, addr):
+    def containsEntry(self, addr:int):
+        """Checks if the cache contains an entry as per the address
+        ...
+        Parameters
+        ----------
+        addr: int
+            address in DM
+        
+        Returns
+        ------
+        int
+            the appropriate index in cache, or -1 if not available
+        """
         tag, set_id = (addr // self.blockSz) // self.num_sets, (addr // self.blockSz) % self.num_sets
         begin = set_id * self.num_entries_per_set
         end = (set_id+1) * self.num_entries_per_set
@@ -36,7 +77,13 @@ class MOESI_Cache:
                 return i
         return -1
     
-    def addEntry(self, entry):
+    def addEntry(self, entry: CacheEntry):
+        """Add a new entry in cache using LRU
+        Parameters
+        ----------
+        entry: int
+            the new entry to be added in the cache
+        """
         set_id = entry.index #(addr % self.blockSz) // self.num_sets, (addr % self.blockSz) % self.num_sets
         begin = set_id * self.num_entries_per_set
         end = (set_id+1) * self.num_entries_per_set
@@ -58,7 +105,18 @@ class MOESI_Cache:
             self.bus.requests = [writeBackRequest] + self.bus.requests
 
     # Need to modify according to protocol
-    def snoopBus(self, clock):
+    def snoopBus(self, clock:int):
+        """Snoops the bus and updates accordingly
+        .....
+        Parameters
+        ----------
+        clock: int
+            the clock tick number
+        Returns
+        -------
+        str
+            Action performed by cache on Snooping
+        """
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
             print(request.addr, request.coreId, request.msg, self.id, request.response)
@@ -150,7 +208,14 @@ class MOESI_Cache:
                         print(f'Wrong msg {request.msg}, {request.coreId} detected in the bus while snooping by cache {self.id}')
         return 'UNUSED'
 
-    def tick(self, clock):
+    def tick(self, clock:int):
+        """Runs one tick of the clock
+        .....
+        Parameters
+        ----------
+        clock: int
+            the clock tick number
+        """
         res = self.snoopBus(clock)
         print(f'{res} returned by snooping at cache {self.id}')
         if res not in ['Upgraded', 'UNUSED', 'RECV_DATA']:
@@ -208,6 +273,7 @@ class MOESI_Cache:
         return
     
     def dump(self):
+        """Prints the current status of the cache for the processor"""
         print(print('-'*18 + f' Cache {self.id} State ' + '-'*18))
         print('Valid\tTag\tIndex\tState\tLast Access time')
         for entry in self.entries:
