@@ -53,6 +53,7 @@ class MOSI_Cache:
         # Stats related fields
         self.cacheAccesses = 0
         self.cacheHits = 0
+        self.cacheMisses = 0
         self.numMemBusTransaction = 0
         self.numCacheBusTransaction = 0  
 
