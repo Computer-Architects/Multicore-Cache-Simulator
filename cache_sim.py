@@ -1,5 +1,5 @@
 import random
-from mosi_cache import MOSI_Cache, Processor, Bus
+from moesi_cache import MOESI_Cache, Processor, Bus
 from memory import RAM
 random.seed(305)
 
@@ -12,15 +12,13 @@ class Computer:
         self.mem = RAM(self.bus)
         self.n = n
         self.processors = [Processor(i, instructions[i]) for i in range(n)]
-        self.caches = [MOSI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
+        self.caches = [MOESI_Cache(i, cacheSz, blockSz, a, self.bus, self.processors[i]) for i in range(n)]
         self.globalClock = 0
         self.done = False
     def run(self):
         maxTime = 20
         while not(self.done) and self.globalClock < maxTime:
             print('#'*18 + ' ' + str(self.globalClock) + ' ' + '#'*18)
-            
-            self.bus.tick(self.globalClock)
 
             for p in self.processors:
                 p.tick(self.globalClock)
@@ -29,6 +27,8 @@ class Computer:
                 c.tick(self.globalClock)
             
             self.mem.tick(self.globalClock)
+            
+            self.bus.tick(self.globalClock)
             
             self.dump()
 
