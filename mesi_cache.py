@@ -140,7 +140,7 @@ class MESI_Cache:
                         if self.currentRequestType != 'READ':
                             self.entries[entry_id].state == 'M'
                         else:
-                            print(f"Setting the state as E or s for index {entry_id}")
+                            # print(f"Setting the state as E or s for index {entry_id}")
                             self.entries[entry_id].state = 'E' if request.responseTime > 0 else 'S'
 
                         self.entries[entry_id].access = clock # Relying on python's mutable objects
@@ -152,12 +152,12 @@ class MESI_Cache:
                             newEntry.access = clock
                             newEntry.valid, newEntry.tag, newEntry.index = True, (request.addr // self.blockSz) // self.num_sets, (request.addr // self.blockSz) % self.num_sets
                         if self.currentRequestType != 'READ':
-                            print("M must be added")
+                            # print("M must be added")
                             newEntry.state = 'M'
                         else:
-                            print("E or S must be added")
+                            # print("E or S must be added")
                             newEntry.state = 'E' if request.responseTime > 0 else 'S'
-                        print("Adding a new ENTRY!!!!!!!!!!!!!!!!!!!!!!")
+                        # print("Adding a new ENTRY!!!!!!!!!!!!!!!!!!!!!!")
                         self.addEntry(newEntry)
 
                     return 'RECV_DATA'
