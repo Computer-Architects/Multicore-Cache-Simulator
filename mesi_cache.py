@@ -128,7 +128,7 @@ class MESI_Cache:
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
             print(request.addr, request.coreId, request.msg, self.id, request.response)
-            entry_id = self.containsEntry(request.addr)
+            # entry_id = self.containsEntry(request.addr)
 
             if request.response or request.msg == 'Flush':
                 # This is a response to some data request
@@ -160,6 +160,7 @@ class MESI_Cache:
                     return 'RECV_DATA'
                 
             else:
+                entry_id = self.containsEntry(request.addr)
                 if entry_id != -1:
                     entry = self.entries[entry_id]
                     # State must be M or S
