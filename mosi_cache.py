@@ -124,9 +124,9 @@ class MOSI_Cache:
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
             if request.responseTime == 0:
-                self.numMemBusTransaction += 1
-            else:
                 self.numCacheBusTransaction += 1
+            else:
+                self.numMemBusTransaction += 1
             print(request.addr, request.coreId, request.msg, self.id, request.response)
             # entry_id = self.containsEntry(request.addr)
 
@@ -283,7 +283,7 @@ class MOSI_Cache:
     def dump(self):
         """Prints the current status of the cache for the processor"""
         print('-'*18 + f' Cache {self.id} State ' + '-'*18)
-        print(f"Statistics: Hits: {self.cacheHits} | Misses: {self.cacheMisses} | Number of memory-bus transactions:{self.numMemBusTransaction} | Number of cache bus transactions: {self.numCacheBusTransaction}")
+        print(f"Statistics: Hits: {self.cacheHits} | Misses: {self.cacheMisses} | Number of cache-bus transactions:{self.numCacheBusTransaction} | Number of memory bus transactions: {self.numMemBusTransaction}")
         print('Valid\tTag\tIndex\tState\tLast Access time')
         for entry in self.entries:
             entry.dump()

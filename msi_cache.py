@@ -124,9 +124,9 @@ class MSI_Cache:
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
             if request.responseTime == 0:
-                self.numMemBusTransaction += 1
-            else:
                 self.numCacheBusTransaction += 1
+            else:
+                self.numMemBusTransaction += 1
             print(request.addr, request.coreId, request.msg, self.id, request.response)
             # entry_id = self.containsEntry(request.addr)
 
@@ -281,7 +281,7 @@ class MSI_Cache:
     
     def dump(self):
         print('-'*18 + f' Cache {self.id} State ' + '-'*18)
-        print(f"Statistics: Hits: {self.cacheHits} | Misses: {self.cacheMisses} | Number of memory-bus transactions:{self.numMemBusTransaction} | Number of cache bus transactions: {self.numCacheBusTransaction}")
+        print(f"Statistics: Hits: {self.cacheHits} | Misses: {self.cacheMisses} | Number of cache-bus transactions:{self.numCacheBusTransaction} | Number of memory bus transactions: {self.numMemBusTransaction}")
         print('Valid\tTag\tIndex\tState\tLast Access time')
         for entry in self.entries:
             entry.dump()
