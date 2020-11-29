@@ -84,8 +84,8 @@ class MESI_Cache:
         return -1
     
     def addEntry(self, entry: CacheEntry):
-        """Add a new entry in cache if space permits
-
+        """Add a new entry in cache using LRU
+    
         Parameters
         ----------
         entry: int
@@ -114,7 +114,7 @@ class MESI_Cache:
     # Need to modify according to protocol
     def snoopBus(self, clock:int):
         """Snoops the bus and updates accordingly
-
+    
         .....
         Parameters
         ----------
@@ -123,7 +123,7 @@ class MESI_Cache:
         Returns
         -------
         str
-            The current state in Bus
+            Action performed by cache on Snooping
         """
         if self.bus.currentData != None:
             request = deepcopy(self.bus.currentData)
