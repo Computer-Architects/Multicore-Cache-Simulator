@@ -60,7 +60,7 @@ Code is in python.
 ## Usage
 
 ```sh
-python run.py --help
+$ python run.py --help
 usage: run.py [-h] [--protocol PROTOCOL] [--cacheSz CACHESZ]
               [--blockSz BLOCKSZ] [--a A] [--testcase TESTCASE]
 
@@ -74,11 +74,11 @@ optional arguments:
 ```
 A general way to use the simulator
 ```sh
-python run.py --protocol PROTOCOL --cacheSz CACHESZ --blockSz BLOCKSZ --a A --testcase TESTCASE
+$ python run.py --protocol PROTOCOL --cacheSz CACHESZ --blockSz BLOCKSZ --a A --testcase TESTCASE
 ```
 Here is an example
 ```sh
-python run.py --testcase 1
+$ python run.py --testcase 1
 ```
 
 <!-- Adding a new protocol -->
@@ -112,7 +112,7 @@ python run.py --testcase 1
 Format of a testcase:
 * Each testcase is a directory with the name *testcase<test_id>*
 * The directory contains a config file which stores the number of cores(processors) in the testcase
-* In addition, it contains files with the names *p<processor_id>.trace*. Each file corresponds to processor *<processor_id>*. The file stores the read write requests.
+* In addition, it contains files with the names *p<processor_id>.trace*. Each file corresponds to processor *<processor_id>*. The file stores the read / write requests made to the processor.
 
 Take a look at this [example](https://github.com/Computer-Architects/Multicore-Cache-Simulator/tree/main/testcases/testcase1).
 
