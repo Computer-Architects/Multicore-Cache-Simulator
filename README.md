@@ -141,10 +141,11 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Team
 
-Sumanyu Ghoshal <br>
-Samad Koita <br>
-Parth Sanghani <br>
 Rishi Agarwal <br>
+Samad Koita <br>
+Sumanyu Ghoshal <br>
+Parth Sangani <br>
+
 
 Project Link: [https://github.com/Computer-Architects/Multicore-Cache-Simulator.git](https://github.com/Computer-Architects/Multicore-Cache-Simulator.git)
 
@@ -152,3 +153,6 @@ Project Link: [https://github.com/Computer-Architects/Multicore-Cache-Simulator.
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
+
+[Cache Coherence Protocols: Evaluation Using a Multiprocessor Simulation Model](https://people.eecs.berkeley.edu/~kubitron/courses/cs252-S12/handouts/papers/p273-archibald.pdf)
+
